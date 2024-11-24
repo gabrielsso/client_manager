@@ -1,5 +1,6 @@
 
 import 'package:app_gerenciamento_cliente/global/repository/person_repository.dart';
+import 'package:app_gerenciamento_cliente/module/person_add/component/custom_text_form_field.dart';
 import 'package:app_gerenciamento_cliente/module/person_add/controller/person_add_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -65,44 +66,24 @@ class _PersonAddViewState extends State<PersonAddView> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        TextFormField(
-                          controller: controller.nomeTextController,
-                          decoration: const InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blueAccent, width: 2.0),
-                            ),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.black54, width: 2.0),
-                            ),
+                        CustomTextFormField(
+                            controller: controller.nomeTextController,
                             labelText: 'Nome',
-                            prefixIcon: Icon(Icons.account_circle_rounded)
-                          ),
-                          validator: (value) {
-                            if(value == null || value.isEmpty) {
-                              return 'Campo nome é obrigatório';
-                            }
+                            prefixIcon: Icons.account_circle_rounded,
+                            validator: (value) {
+                              if(value == null || value.isEmpty) {
+                                return 'Campo nome é obrigatório';
+                              }
 
-                            return null;
-                          },
-                          textInputAction: TextInputAction.next,
+                              return null;
+                            },
+                            textInputAction: TextInputAction.next,
                         ),
                         const SizedBox(height: 20),
-                        TextFormField(
+                        CustomTextFormField(
                           controller: controller.emailTextController,
-                          decoration: const InputDecoration(
-                              filled: true,
-                              fillColor: Colors.white,
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.blueAccent, width: 2.0),
-                              ),
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.black54, width: 2.0),
-                              ),
-                              labelText: 'Email',
-                            prefixIcon: Icon(Icons.email_rounded)
-                          ),
+                          labelText: 'Email',
+                          prefixIcon: Icons.email_rounded,
                           validator: (value) {
                             if(value == null || value.isEmpty) {
                               return 'Campo email é obrigatório';
@@ -115,23 +96,13 @@ class _PersonAddViewState extends State<PersonAddView> {
                           textInputAction: TextInputAction.next,
                         ),
                         const SizedBox(height: 20),
-                        TextFormField(
+                        CustomTextFormField(
                           controller: controller.telefoneTextController,
                           inputFormatters: [
                             controller.telefoneMask
                           ],
-                          decoration: const InputDecoration(
-                              filled: true,
-                              fillColor: Colors.white,
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.blueAccent, width: 2.0),
-                              ),
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.black54, width: 2.0),
-                              ),
-                              labelText: 'Telefone',
-                              prefixIcon: Icon(Icons.phone)
-                          ),
+                          labelText: 'Telefone',
+                          prefixIcon: Icons.phone,
                           validator: (value) {
                             if(value == null || value.isEmpty) {
                               return 'Campo telefone é obrigatório';
@@ -148,21 +119,11 @@ class _PersonAddViewState extends State<PersonAddView> {
                         ValueListenableBuilder(
                             valueListenable: controller.nascimento,
                             builder: (_, data, __) {
-                              return TextFormField(
+                              return CustomTextFormField(
                                 controller: controller.nascimentoTextController,
                                 readOnly: true,
-                                decoration: const InputDecoration(
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(color: Colors.blueAccent, width: 2.0),
-                                    ),
-                                    border: OutlineInputBorder(
-                                      borderSide: BorderSide(color: Colors.black54, width: 2.0),
-                                    ),
-                                    labelText: 'Data de nascimento',
-                                    prefixIcon: Icon(Icons.calendar_month_rounded)
-                                ),
+                                labelText: 'Data de nascimento',
+                                prefixIcon: Icons.calendar_month_rounded,
                                 validator: (value) {
                                   if(value == null || value.isEmpty) {
                                     return 'Campo data de nascimento é obrigatório';
@@ -172,7 +133,7 @@ class _PersonAddViewState extends State<PersonAddView> {
                                 },
                                 onTap: () {
                                   _selectDate(context);
-                                },
+                                }
                               );
                             }
                         ),

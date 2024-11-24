@@ -45,7 +45,9 @@ class PersonRepository extends GetxService {
           } on Exception catch(e) {
             person.flagInvalidPerson();
             await box.put(person.key, person);
-            onErrorCallback.call('$e');
+            onErrorCallback.call(
+                'Ocorreu um erro durante a sincronização de dados pendentes: ${person.name}'
+            );
           }
         } else {
           try {
@@ -61,7 +63,9 @@ class PersonRepository extends GetxService {
           } on Exception catch(e) {
             person.flagInvalidPerson();
             await box.put(person.key, person);
-            onErrorCallback.call('$e');
+            onErrorCallback.call(
+                'Ocorreu um erro durante a sincronização de dados pendentes: ${person.name}'
+            );
           }
         }
       }
@@ -125,14 +129,16 @@ class PersonRepository extends GetxService {
             personLocal.serverId = success;
             await box.put(personLocal.key, personLocal);
           }
-        } on Exception catch (e) {
+        } on Exception catch (_) {
           if(keyOriginal == null) {
             await box.delete(keyLocal);
           } else {
             personLocal.flagInvalidPerson();
             await box.put(keyOriginal, personLocal);
           }
-          rethrow;
+          throw Exception(
+              'Ocorreu um erro durante a tentativa de salvar o cliente: ${personLocal.name}'
+          );
         }
       }
 
@@ -163,9 +169,11 @@ class PersonRepository extends GetxService {
         }
 
         return true;
-      } on Exception catch(e) {
+      } on Exception catch(_) {
         await box.put(keyOriginal, originalData);
-        throw Exception('Erro ao atualizar cliente: $e');
+        throw Exception(
+            'Ocorreu um erro durante a tentativa de atualização do cliente: ${originalData.name}'
+        );
       }
     }
 

@@ -17,10 +17,9 @@ class PersonService {
           return json['id'] as int?;
         } else {
           final json = jsonDecode(response.body);
-          print(json);
           throw Exception('Erro: ${json['message'] ?? "Ocorreu um erro enquanto efetuava cadastro"}');
         }
-      } on Exception catch (e) {
+      } on Exception catch (_) {
         rethrow;
       }
     }
@@ -35,7 +34,7 @@ class PersonService {
           final json = jsonDecode(response.body);
           throw Exception('Erro: ${json['message'] ?? "Ocorreu um erro enquanto efetuava edição"}');
         }
-      } on Exception catch (e) {
+      } on Exception catch (_) {
         rethrow;
       }
     }

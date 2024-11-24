@@ -66,53 +66,7 @@ class _PersonListViewState extends State<PersonListView> {
                       ),
                     );
                   } else {
-                    return Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: () async {
-                          controller.getPersons();
-                        },
-                        child: ValueListenableBuilder(
-                            valueListenable: controller.persons,
-                            builder: (ctx, data, __) {
-                              if(data.isEmpty) {
-                                return SingleChildScrollView(
-                                  physics: const AlwaysScrollableScrollPhysics(),
-                                  child: Container(
-                                      height: size.height - Scaffold.of(ctx).appBarMaxHeight!,
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                          'Sem clientes',
-                                          style: theme.textTheme.headlineLarge?.copyWith(
-                                            color: Colors.black54
-                                          ),
-                                      )
-                                  ),
-                                );
-                              } else {
-                                return ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: data.length,
-                                    itemBuilder: (ctx, index) {
-                                      final person = data[index];
-                                      return ClientCard(
-                                          person: person,
-                                          onCardClickCallback: () async {
-                                            final retorno = await Get.toNamed(addPage, arguments: person);
-                                            if(retorno != null) {
-                                              controller.getPersons();
-                                            }
-                                          },
-                                          onConfirmCallback: () {
-                                            controller.deletePerson(person);
-                                          }
-                                      );
-                                    }
-                                );
-                              }
-                            }
-                        ),
-                      ),
-                    );
+                    return listPersons(size, theme);
                   }
                 }
             )
@@ -132,6 +86,56 @@ class _PersonListViewState extends State<PersonListView> {
           backgroundColor: theme.colorScheme.secondary,
           tooltip: 'Adicionar cliente',
           child: const Icon(Icons.add, color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  Widget listPersons(Size size, ThemeData theme) {
+    return Expanded(
+      child: RefreshIndicator(
+        onRefresh: () async {
+          controller.getPersons();
+        },
+        child: ValueListenableBuilder(
+            valueListenable: controller.persons,
+            builder: (ctx, data, __) {
+              if(data.isEmpty) {
+                return SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Container(
+                      height: size.height - Scaffold.of(ctx).appBarMaxHeight!,
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Sem clientes',
+                        style: theme.textTheme.headlineLarge?.copyWith(
+                            color: Colors.black54
+                        ),
+                      )
+                  ),
+                );
+              } else {
+                return ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: data.length,
+                    itemBuilder: (ctx, index) {
+                      final person = data[index];
+                      return ClientCard(
+                          person: person,
+                          onCardClickCallback: () async {
+                            final retorno = await Get.toNamed(addPage, arguments: person);
+                            if(retorno != null) {
+                              controller.getPersons();
+                            }
+                          },
+                          onConfirmCallback: () {
+                            controller.deletePerson(person);
+                          }
+                      );
+                    }
+                );
+              }
+            }
         ),
       ),
     );
