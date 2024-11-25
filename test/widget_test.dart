@@ -224,7 +224,7 @@ void main() {
       }
 
       verify(() => mockRepository.isConnected()).called(1);
-      verifyNever(() => mockRepository.addPerson(personDto, null));
+      verify(() => mockService.addPerson(personDto)).called(1);
     });
   });
 
@@ -329,9 +329,107 @@ void main() {
 
   group('editPerson', () {
     test('Deve editar um cliente no Hive e marcar como não sincronizado quando o dispositivo estiver sem conexão', () async {
+      final persons = [
+        Person(name: 'Alice', isDeleted: false, email: 'alice@mail.com', phone: '(27)99999-9999', birthDate: '2024-11-21T00:00:00Z', serverId: 200, isSynced: true),
+        Person(name: 'Bob', isDeleted: true, email: 'bob@mail.com', phone: '(27)99999-9999', birthDate: '2024-11-21T00:00:00Z', serverId: 100, isSynced: true),
+      ];
+      when(() => mockRepository.isConnected()).thenAnswer((_) async => false);
+      when(() => mockBox.values).thenReturn(persons);
 
+      final isConnected = await mockRepository.isConnected();
+      expect(isConnected, isFalse, reason: 'O dispositivo deve está sem conexão');
+      
+      List<Person> data = mockBox.values.toList();
+      Person personEdit = data.first;
+      personEdit.updateData(
+        email: 'alice2@mail.com',
+        phone: '(27) 47548-5984',
+      );
+      
+      when(() => mockRepository.updatePerson(data.first, personEdit)).thenAnswer((_) async => true);
+      final result = await mockRepository.updatePerson(data.first, personEdit);
+      expect(result, isTrue, reason: 'A alteração deve dar sucesso e modificar os dados do cliente');
+
+      data = data.map((person) {
+        if(person.key == personEdit.key) {
+          return personEdit;
+        } else {
+          return person;
+        }
+      }).toList();
+      
+      expect(data.first.email, equals('alice2@mail.com'), reason: 'O cliente deveria ter tido as informações alteradas');
+      expect(data.first.phone, equals('(27) 47548-5984'), reason: 'O cliente deveria ter tido as informações alteradas');
+      expect(data.first.isSynced, isFalse, reason: 'O cliente deve ter alterações pendentes');
+
+      verify(() => mockRepository.isConnected()).called(1);
+      verify(() => mockRepository.updatePerson(data.first, personEdit)).called(1);
     });
-    test('Deve editar um cliente no Hive e marcar como sincronizado quando houver conexão com a internet', () async {});
-    test('Deve retornar um erro de email duplicado ao tentar adicionar um email já cadastrado', () async {});
+
+    test('Deve editar um cliente no Hive e marcar como sincronizado quando houver conexão com a internet', () async {
+      final persons = [
+        Person(name: 'Alice', isDeleted: false, email: 'alice@mail.com', phone: '(27)99999-9999', birthDate: '2024-11-21T00:00:00Z', serverId: 200, isSynced: true),
+        Person(name: 'Bob', isDeleted: true, email: 'bob@mail.com', phone: '(27)99999-9999', birthDate: '2024-11-21T00:00:00Z', serverId: 100, isSynced: true),
+      ];
+      when(() => mockRepository.isConnected()).thenAnswer((_) async => true);
+      when(() => mockBox.values).thenReturn(persons);
+
+      final isConnected = await mockRepository.isConnected();
+      expect(isConnected, isTrue, reason: 'O dispositivo deveria ter conexão');
+
+      List<Person> data = mockBox.values.toList();
+      Person personEdit = data.first;
+      personEdit.updateData(
+        email: 'alice2@mail.com',
+        phone: '(27) 47548-5984',
+        isSynced: true
+      );
+
+      when(() => mockRepository.updatePerson(data.first, personEdit)).thenAnswer((_) async => true);
+      final result = await mockRepository.updatePerson(data.first, personEdit);
+      expect(result, isTrue, reason: 'A alteração deve dar sucesso e modificar os dados do cliente');
+
+      data = data.map((person) {
+        if(person.key == personEdit.key) {
+          return personEdit;
+        } else {
+          return person;
+        }
+      }).toList();
+
+      expect(data.first.email, equals('alice2@mail.com'), reason: 'O cliente deveria ter tido as informações alteradas');
+      expect(data.first.phone, equals('(27) 47548-5984'), reason: 'O cliente deveria ter tido as informações alteradas');
+      expect(data.first.isSynced, isTrue, reason: 'O cliente deve ter alterações sincronizada');
+
+      verify(() => mockRepository.isConnected()).called(1);
+      verify(() => mockRepository.updatePerson(data.first, personEdit)).called(1);
+    });
+
+    test('Deve retornar um erro de email duplicado ao tentar editar um cliente com email já cadastrado', () async {
+      final personDto = PersonDTO(
+          id: null,
+          name: 'Alice',
+          email: 'bob@mail.com',
+          phone: '(27) 47548-5984',
+          birthDate: '2024-11-21T00:00:00Z'
+      );
+      when(() => mockRepository.isConnected()).thenAnswer((_) async => true);
+      when(() => mockService.updatePerson(personDto)).thenThrow( Exception('Erro: Email already taken'));
+
+      final isConnected = await mockRepository.isConnected();
+      expect(isConnected, isTrue, reason: 'Necessita de conexão a internet para adicionar o cliente no servidor');
+
+      try {
+        await mockService.updatePerson(personDto);
+        fail('O serviço deveria ter lançado uma exceção');
+      } catch (e) {
+        expect(e, isA<Exception>(), reason: 'Esperado erro de tipo Exception');
+        expect(e.toString(), contains('Erro: Email already taken'), reason: 'Erro específico esperado');
+      }
+
+      verify(() => mockRepository.isConnected()).called(1);
+      verify(() => mockService.updatePerson(personDto)).called(1);
+    });
+
   });
 }
