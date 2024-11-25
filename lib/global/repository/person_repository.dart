@@ -16,7 +16,7 @@ class PersonRepository extends GetxService {
       required Function(String) onErrorCallback
     }) async {
       final box = await Hive.openBox<Person>(hiveBoxName);
-      if(box.isNotEmpty && await _isConnected()) {
+      if(box.isNotEmpty && await isConnected()) {
         await _handleUnsyncedData(box, onErrorCallback);
         await _handlePendingDeleteData(box, onErrorCallback);
         await _handleUpdateDataWithServer(box);
@@ -120,7 +120,7 @@ class PersonRepository extends GetxService {
       } else {
         keyLocal = await box.add(personLocal);
       }
-      if(await _isConnected()) {
+      if(await isConnected()) {
         try {
           final success = await service.addPerson(data);
           if(success != null) {
@@ -153,7 +153,7 @@ class PersonRepository extends GetxService {
       await box.put(originalData.key, newData);
 
       try {
-        if(await _isConnected()) {
+        if(await isConnected()) {
           final success =  await service.updatePerson(newData.toDto());
           if(success) {
             newData.isValid = true;
@@ -183,7 +183,7 @@ class PersonRepository extends GetxService {
           return box.values.where((person) => !person.isDeleted).toList();
         } else {
           var data = <PersonDTO>[];
-          if(await _isConnected()) {
+          if(await isConnected()) {
             data = await service.fetchPersons();
           }
           return await syncPersonOnHive(data);
@@ -195,7 +195,7 @@ class PersonRepository extends GetxService {
       if(person.serverId == null) {
         await box.delete(person.key);
       } else {
-        if(await _isConnected()) {
+        if(await isConnected()) {
           final success = await service.deletePerson(person.serverId!);
           if(success) {
             await box.delete(person.key);
@@ -227,7 +227,7 @@ class PersonRepository extends GetxService {
       return syncedPersons;
     }
 
-    Future<bool> _isConnected() async {
+    Future<bool> isConnected() async {
       try {
         final result = await InternetAddress.lookup('example.com');
         return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
